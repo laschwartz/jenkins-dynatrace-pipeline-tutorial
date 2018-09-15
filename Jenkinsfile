@@ -76,5 +76,27 @@ node {
         }
     }
 
+    stage('ValidateStaging') {
+        // lets see if Dynatrace AI found problems -> if so - we can stop the pipeline!
+        dir ('dynatrace-scripts') {
+            DYNATRACE_PROBLEM_COUNT = sh (script: './checkforproblems.sh', returnStatus : true)
+            echo "Dynatrace Problems Found: ${DYNATRACE_PROBLEM_COUNT}"
+        }
+
+        // now lets generate a report using our CLI and lets generate some direct links back to dynatrace
+        dir ('dynatrace-cli') {
+            sh 'python3 dtcli.py dqlr srv tags/CONTEXTLESS:DockerService=SampleNodeJsStaging '+
+                        'service.responsetime[avg%hour],service.responsetime[p90%hour] ${DT_URL} ${DT_TOKEN}'
+            sh 'mv dqlreport.html dqlstagingreport.html'
+            archiveArtifacts artifacts: 'dqlstagingreport.html', fingerprint: true
+
+            // get the link to the service's dashboard and make it an artifact
+            sh 'python3 dtcli.py link srv tags/CONTEXTLESS:DockerService=SampleNodeJsStaging '+
+                        'overview 60:0 ${DT_URL} ${DT_TOKEN} > dtstagelinks.txt'
+            archiveArtifacts artifacts: 'dtstagelinks.txt', fingerprint: true
+        }
+    }
+
+
 
 }
