@@ -22,4 +22,12 @@ node {
         }
     }
 
+    stage('CleanStaging') {
+        // The cleanup script makes sure no previous docker staging containers run
+        dir ('sample-nodejs-service') {
+            sh "./cleanup.sh SampleNodeJsStaging"
+        }
+    }
+
+
 }
