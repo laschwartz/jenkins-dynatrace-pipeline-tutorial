@@ -51,4 +51,30 @@ node {
         }
     }
 
+    stage('Testing') {
+        // lets push an event to dynatrace that indicates that we START a load test
+        dir ('dynatrace-scripts') {
+            sh './pushevent.sh SERVICE CONTEXTLESS DockerService SampleNodeJsStaging ' +
+               '"STARTING Load Test" ${JOB_NAME} "Starting a Load Test as part of the Testing stage"' +
+               ' ${JENKINS_URL} ${JOB_URL} ${BUILD_URL} ${GIT_COMMIT}'
+        }
+
+        // lets run some test scripts
+        dir ('sample-nodejs-service-tests') {
+            // start load test and run for 120 seconds - simulating traffic for Staging enviornment on port 80
+            sh "rm -f stagingloadtest.log stagingloadtestcontrol.txt"
+            sh "./loadtest.sh 80 stagingloadtest.log stagingloadtestcontrol.txt 120 Staging"
+
+            archiveArtifacts artifacts: 'stagingloadtest.log', fingerprint: true
+        }
+
+        // lets push an event to dynatrace that indicates that we STOP a load test
+        dir ('dynatrace-scripts') {
+            sh './pushevent.sh SERVICE CONTEXTLESS DockerService SampleNodeJsStaging '+
+               '"STOPPING Load Test" ${JOB_NAME} "Stopping a Load Test as part of the Testing stage" '+
+               '${JENKINS_URL} ${JOB_URL} ${BUILD_URL} ${GIT_COMMIT}'
+        }
+    }
+
+
 }
