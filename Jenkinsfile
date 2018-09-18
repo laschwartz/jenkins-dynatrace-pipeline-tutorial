@@ -16,4 +16,89 @@ node {
             git url: 'https://github.com/laschwartz/dynatrace-cli.git', credentialsId: 'ddc7227e-e158-4e3a-a73c-0ca03f4f4bd4', branch: 'master'
         }
     }
+
+    stage('Build') {
+        // Lets build our docker image
+        dir ('sample-nodejs-service') {
+            def app = docker.build("sample-nodejs-service:${BUILD_NUMBER}")
+        }
+    }
+
+    stage('CleanStaging') {
+        // The cleanup script makes sure no previous docker staging containers run
+        dir ('sample-nodejs-service') {
+            sh "./cleanup.sh SampleNodeJsStaging"
+        }
+    }
+
+    stage('DeployStaging') {
+        // Lets deploy the previously build container
+        def app = docker.image("sample-nodejs-service:${BUILD_NUMBER}")
+        app.run("--name SampleNodeJsStaging -p 80:80 " +
+                "-e 'DT_CLUSTER_ID=SampleNodeJsStaging' " +
+                "-e 'DT_TAGS=Environment=Staging Service=Sample-NodeJs-Service' " +
+                "-e 'DT_CUSTOM_PROP=ENVIRONMENT=Staging JOB_NAME=${JOB_NAME} " +
+                    "BUILD_TAG=${BUILD_TAG} BUILD_NUMBER=${BUIlD_NUMBER}'")
+
+        dir ('dynatrace-scripts') {
+            // push a deployment event on the host with the tag [AWS]Environment:JenkinsTutorial
+            sh './pushdeployment.sh HOST AWS Environment JenkinsTutorial ' +
+               '${BUILD_TAG} ${BUILD_NUMBER} ${JOB_NAME} ' +
+               'Jenkins ${JENKINS_URL} ${JOB_URL} ${BUILD_URL} ${GIT_COMMIT}'
+
+            // now I push one on the actual service (it has the tags from our rules)
+            sh './pushdeployment.sh SERVICE CONTEXTLESS DockerService SampleNodeJsStaging ' +
+               '${BUILD_TAG} ${BUILD_NUMBER} ${JOB_NAME} ' +
+               'Jenkins ${JENKINS_URL} ${JOB_URL} ${BUILD_URL} ${GIT_COMMIT}'
+        }
+    }
+
+
+    stage('Testing') {
+        // lets push an event to dynatrace that indicates that we START a load test
+        dir ('dynatrace-scripts') {
+            sh './pushevent.sh SERVICE CONTEXTLESS DockerService SampleNodeJsStaging ' +
+               '"STARTING Load Test" ${JOB_NAME} "Starting a Load Test as part of the Testing stage"' +
+               ' ${JENKINS_URL} ${JOB_URL} ${BUILD_URL} ${GIT_COMMIT}'
+        }
+
+        // lets run some test scripts
+        dir ('sample-nodejs-service-tests') {
+            // start load test and run for 120 seconds - simulating traffic for Staging enviornment on port 80
+            sh "rm -f stagingloadtest.log stagingloadtestcontrol.txt"
+            sh "./loadtest.sh 80 stagingloadtest.log stagingloadtestcontrol.txt 120 Staging"
+
+            archiveArtifacts artifacts: 'stagingloadtest.log', fingerprint: true
+        }
+
+        // lets push an event to dynatrace that indicates that we STOP a load test
+        dir ('dynatrace-scripts') {
+            sh './pushevent.sh SERVICE CONTEXTLESS DockerService SampleNodeJsStaging '+
+               '"STOPPING Load Test" ${JOB_NAME} "Stopping a Load Test as part of the Testing stage" '+
+               '${JENKINS_URL} ${JOB_URL} ${BUILD_URL} ${GIT_COMMIT}'
+        }
+    }
+
+
+    stage('ValidateStaging') {
+        // lets see if Dynatrace AI found problems -> if so - we can stop the pipeline!
+        dir ('dynatrace-scripts') {
+            DYNATRACE_PROBLEM_COUNT = sh (script: './checkforproblems.sh', returnStatus : true)
+            echo "Dynatrace Problems Found: ${DYNATRACE_PROBLEM_COUNT}"
+        }
+
+        // now lets generate a report using our CLI and lets generate some direct links back to dynatrace
+        dir ('dynatrace-cli') {
+            sh 'python3 dtcli.py dqlr srv tags/CONTEXTLESS:DockerService=SampleNodeJsStaging '+
+                        'service.responsetime[avg%hour],service.responsetime[p90%hour] ${DT_URL} ${DT_TOKEN}'
+            sh 'mv dqlreport.html dqlstagingreport.html'
+            archiveArtifacts artifacts: 'dqlstagingreport.html', fingerprint: true
+
+            // get the link to the service's dashboard and make it an artifact
+            sh 'python3 dtcli.py link srv tags/CONTEXTLESS:DockerService=SampleNodeJsStaging '+
+                        'overview 60:0 ${DT_URL} ${DT_TOKEN} > dtstagelinks.txt'
+            archiveArtifacts artifacts: 'dtstagelinks.txt', fingerprint: true
+        }
+    }
+
 }
