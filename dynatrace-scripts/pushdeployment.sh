@@ -22,10 +22,16 @@ PAYLOAD=$(cat <<EOF
 {
   "eventType": "CUSTOM_DEPLOYMENT",
   "attachRules" : {
-    "tagRule" : { 
-        "meTypes" : "HOST",
-        "tags" : "JenkinsTutorial" 
-      }
+    "tagRule" : [
+      {
+        "meTypes" : ["$1"],
+        "tags" : [
+          {
+            "context" : "$2",
+            "key" : "$3",
+            "value" : "$4"
+          }]
+      }]
   },
   "deploymentName" : "$5",
   "deploymentVersion" : "$6",
