@@ -104,11 +104,19 @@ node {
         }
     }
 
-    stage('DeployProduction') {
-        // first we clean production
+    stage('CleanProduction') {
+        // The cleanup script makes sure no previous docker staging containers run
         dir ('sample-nodejs-service') {
             sh "./cleanup.sh SampleNodeJsProduction"
         }
+    }
+
+
+    stage('DeployProduction') {
+        // first we clean production
+        //dir ('sample-nodejs-service') {
+            //sh "./cleanup.sh SampleNodeJsProduction"
+        //}
 
         // now we deploy the new container
         def app = docker.image("sample-nodejs-service:${BUILD_NUMBER}")
