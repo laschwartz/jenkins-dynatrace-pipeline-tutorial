@@ -18,6 +18,7 @@
 # Pushing same Custom Deployment event using Jenkins Propeties
 # ./dynatrace-scripts/pushtag.sh HOST AWS Environment JenkinsTutorial ${BUILD_TAG} ${BUILD_NUMBER} ${JOB_NAME} Jenkins ${JENKINS_URL} ${JOB_URL} ${BUILD_URL} ${GIT_COMMIT}
 
+
 PAYLOAD=$(cat <<EOF
 {
   "eventType": "CUSTOM_DEPLOYMENT",
@@ -39,9 +40,9 @@ PAYLOAD=$(cat <<EOF
   "source" : "$8",
   "ciBackLink" : "$9",
   "customProperties" : {
-    "JenkinsUrl" : "$10",
-    "BuildUrl" : "$11",
-    "GitCommit" : "$12"
+    "JenkinsUrl" : "${10}",
+    "BuildUrl" : "${11}",
+    "GitCommit" : "${12}"
   }
 }
 EOF
