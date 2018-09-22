@@ -6,6 +6,7 @@ node {
     }
  
     stage('Checkout') {
+ sh 'printenv'
         // Checkout our application source code
         //git url: 'https://github.com/dynatrace-innovationlab/jenkins-dynatrace-pipeline-tutorial.git', credentialsId: 'cd41a86f-ea57-4477-9b10-7f9277e650e1', branch: 'master'
         git url: 'https://github.com/laschwartz/jenkins-dynatrace-pipeline-tutorial.git', credentialsId: 'ddc7227e-e158-4e3a-a73c-0ca03f4f4bd4', branch: 'master'
@@ -42,6 +43,7 @@ node {
 
         dir ('dynatrace-scripts') {
             // push a deployment event on the host with the tag [AWS]Environment:JenkinsTutorial
+ sh 'printenv'
             sh './pushdeployment.sh HOST AWS Environment JenkinsTutorial ' +
                '${BUILD_TAG} ${BUILD_NUMBER} ${JOB_NAME} ' +
                'Jenkins ${JENKINS_URL} ${JOB_URL} ${BUILD_URL} ${GIT_COMMIT}'
