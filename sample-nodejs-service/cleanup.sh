@@ -1,3 +1,5 @@
+#!/bin/bash
+
 IMAGENAME=$1
 vCnt=`docker ps -a | grep -c ${IMAGENAME}`
 
