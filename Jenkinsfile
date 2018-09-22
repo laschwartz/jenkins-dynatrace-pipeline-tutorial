@@ -107,7 +107,7 @@ node {
     stage('DeployProduction') {
         // first we clean production
         dir ('sample-nodejs-service') {
-            //sh "./cleanup.sh SampleNodeJsProduction"
+            sh "./cleanup.sh SampleNodeJsProduction"
         }
 
         // now we deploy the new container
