@@ -90,6 +90,8 @@ node {
 
         // now lets generate a report using our CLI and lets generate some direct links back to dynatrace
         dir ('dynatrace-cli') {
+            sh 'python3 dtcli.py config apitoken 0tqs_eq7Q9-CvF8mSbPRP tenanthost https://tsc63872.live.dynatrace.com'
+            sh 'python3 dtcli.py config cacheupdate 5'
             sh 'python3 dtcli.py dqlr srv tags/CONTEXTLESS:DockerService=SampleNodeJsStaging '+
                         'service.responsetime[avg%hour],service.responsetime[p90%hour] ${DT_URL} ${DT_TOKEN}'
             sh 'mv dqlreport.html dqlstagingreport.html'
