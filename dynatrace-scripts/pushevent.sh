@@ -38,8 +38,8 @@ PAYLOAD=$(cat <<EOF
   "annotationDescription" : "$7",
   "customProperties" : {
     "JenkinsUrl" : "$8",
-    "BuildUrl" : "$9",
-    "GitCommit" : "$10"
+    "BuildUrl" : "${10}",
+    "GitCommit" : "${11}"
   }
 }
 EOF
