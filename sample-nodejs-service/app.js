@@ -25,6 +25,8 @@ var init = function(newBuildNumber) {
 	// CHECK IF WE ARE RUNNING "In Production"
 	inProduction = process.env.DEPLOYMENT_GROUP_NAME && process.env.DEPLOYMENT_GROUP_NAME.startsWith("Production");
 	
+	newBuildNumber = 2;
+
 	if(inProduction) {
 		minSleep = 300; // we just simulate that production is a bit faster than staging, e.g: better hardware!
 	}
