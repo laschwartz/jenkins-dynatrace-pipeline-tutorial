@@ -25,8 +25,6 @@ var init = function(newBuildNumber) {
 	// CHECK IF WE ARE RUNNING "In Production"
 	inProduction = process.env.DEPLOYMENT_GROUP_NAME && process.env.DEPLOYMENT_GROUP_NAME.startsWith("Production");
 	
-	newBuildNumber = 2;
-
 	if(inProduction) {
 		minSleep = 300; // we just simulate that production is a bit faster than staging, e.g: better hardware!
 	}
@@ -42,7 +40,8 @@ var init = function(newBuildNumber) {
 		buildNumber = parseInt(newBuildNumber);
 	}
 	else if(process.env.BUILD_NUMBER && process.env.BUILD_NUMBER != null) {
-		buildNumber = parseInt(process.env.BUILD_NUMBER);
+		//buildNumber = parseInt(process.env.BUILD_NUMBER);
+		buildNumber = parseInt(1);
     }
 
 	switch(buildNumber) {
