@@ -11,7 +11,7 @@ var port = process.env.PORT || 80,
 // ======================================================================
 // Here are some global config entries that change the behavior of the app
 // ======================================================================
-var buildNumber = 2;
+var buildNumber = 1;
 var minSleep = 500;
 var requestCount = 0;
 var inProduction = false;
@@ -40,8 +40,7 @@ var init = function(newBuildNumber) {
 		buildNumber = parseInt(newBuildNumber);
 	}
 	else if(process.env.BUILD_NUMBER && process.env.BUILD_NUMBER != null) {
-		//buildNumber = parseInt(process.env.BUILD_NUMBER);
-		buildNumber = parseInt(1);
+		buildNumber = parseInt(process.env.BUILD_NUMBER);
     }
 
 	switch(buildNumber) {
