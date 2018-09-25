@@ -88,6 +88,8 @@ var log = function(severity, entry) {
 	// console.log(entry);
 	if (severity === SEVERITY_DEBUG) {
 		// dont log debug
+		var logEntry = new Date().toISOString() + ' - ' + severity + " - " + entry + '\n';
+		logstream.write(logEntry);
 	} else {
 		var logEntry = new Date().toISOString() + ' - ' + severity + " - " + entry + '\n';
 		// fs.appendFileSync('./serviceoutput.log', new Date().toISOString() + ' - ' + severity + " - " + entry + '\n');
