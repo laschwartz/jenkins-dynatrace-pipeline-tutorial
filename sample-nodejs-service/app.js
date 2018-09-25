@@ -11,7 +11,7 @@ var port = process.env.PORT || 80,
 // ======================================================================
 // Here are some global config entries that change the behavior of the app
 // ======================================================================
-var buildNumber = 4;
+var buildNumber = 2;
 var minSleep = 500;
 var requestCount = 0;
 var inProduction = false;
@@ -43,7 +43,7 @@ var init = function(newBuildNumber) {
 		buildNumber = parseInt(process.env.BUILD_NUMBER);
     }
 
-		buildNumber = parseInt(4);
+		buildNumber = parseInt(2);
 	switch(buildNumber) {
 		case 2:
 			failInvokeRequestPercentage = 2;
@@ -60,7 +60,8 @@ var init = function(newBuildNumber) {
 			break;
 	}
 
-	console.log("Init: " + buildNumber + "/" + failInvokeRequestPercentage);
+	//console.log("Init: " + buildNumber + "/" + failInvokeRequestPercentage);
+	log(SEVERITY_INFO, "Init: " + buildNumber + "/" + failInvokeRequestPercentage);
 } 
 
 // ======================================================================
@@ -251,5 +252,5 @@ init(null);
 server.listen(port);
 
 // Put a friendly message on the terminal
-console.log('Server running at http://127.0.0.1:' + port + '/');
+//console.log('Server running at http://127.0.0.1:' + port + '/');
 log(SEVERITY_INFO, "Service is up and running - feed me with data!");
